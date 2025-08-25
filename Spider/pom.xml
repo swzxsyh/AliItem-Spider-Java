@@ -31,9 +31,12 @@
     <!-- MySQL驱动版本 -->
     <mysql.version>9.3.0</mysql.version>
     <okhttp.version>4.9.3</okhttp.version>
+    <pagehelper.version>5.3.2</pagehelper.version>
+    <!-- util -->
+    <hutool.version>5.8.28</hutool.version>
     <commons.lang3.version>3.18.0</commons.lang3.version>
-    <binarywang.weixin.java.version>4.2.0</binarywang.weixin.java.version>
     <com.google.guava.version>33.4.8-jre</com.google.guava.version>
+    <selenium.version>4.10.0</selenium.version>
   </properties>
 
   <dependencies>
@@ -68,6 +71,28 @@
     </dependency>
 
     <dependency>
+      <groupId>com.github.pagehelper</groupId>
+      <artifactId>pagehelper</artifactId>
+      <version>${pagehelper.version}</version>
+    </dependency>
+
+    <!-- Cache -->
+    <!-- Redis -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+
+    <!-- spider -->
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>${selenium.version}</version>
+    </dependency>
+
+
+    <!-- util -->
+    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <scope>provided</scope>
@@ -82,19 +107,7 @@
     <dependency>
       <groupId>cn.hutool</groupId>
       <artifactId>hutool-all</artifactId>
-      <version>5.8.28</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.github.pagehelper</groupId>
-      <artifactId>pagehelper</artifactId>
-      <version>5.3.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.github.binarywang</groupId>
-      <artifactId>weixin-java-cp</artifactId>
-      <version>${binarywang.weixin.java.version}</version>
+      <version>${hutool.version}</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->

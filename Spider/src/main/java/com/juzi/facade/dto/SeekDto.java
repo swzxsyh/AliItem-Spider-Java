@@ -8,6 +8,8 @@ public class SeekDto {
   // 关键词
   private String keyword;
 
+  private Integer shopType;
+
   // 排序规则
   private Integer sort;
 

@@ -25,10 +25,10 @@ public class CaptureController {
   @Autowired private CaptureService captureService;
   @Autowired private RecordService recordService;
 
-  @GetMapping("/seek")
+  @GetMapping("/run")
   public Result<?> seek(@RequestBody SeekDto dto) {
     // dto 应包含 关键词, 排序规则, 第几页开始, 销量过滤数量
-    captureService.capture(dto);
+    captureService.crawl(dto);
     return Result.success();
   }
 

@@ -16,4 +16,10 @@ public class CacheUtil {
   public static <T> List<T> get(String key) {
     return new ArrayList<>();
   }
+
+  public static void rpush(String uuid, List<?> result) {}
+
+  public static void del(String uuid) {
+
+  }
 }
