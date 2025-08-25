@@ -13,7 +13,7 @@ public class CacheUtil {
     return Boolean.FALSE;
   }
 
-  public static List<?> get(String key) {
+  public static <T> List<T> get(String key) {
     return new ArrayList<>();
   }
 }

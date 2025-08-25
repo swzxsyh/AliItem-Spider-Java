@@ -6,6 +6,7 @@ import com.juzi.facade.dto.SeekDto;
 import com.juzi.infra.CaptureConstant;
 import com.juzi.infra.ExportUtil;
 import com.juzi.infra.model.Result;
+import com.juzi.infra.model.vo.ItemVo;
 import com.juzi.infra.utils.BuilderUtil;
 import java.io.IOException;
 import java.util.List;
@@ -41,7 +42,7 @@ public class CaptureController {
 
     if (exist) {
       String key = BuilderUtil.format(CaptureConstant.RECORD_REFIX, userName, uuid);
-      List<?> rows = captureService.download(key);
+      List<ItemVo> rows = captureService.download(key);
       ExportUtil.export(rows, uuid, response);
     }
     throw new RuntimeException("Record Not Exist");

@@ -2,6 +2,7 @@ package com.juzi.application;
 
 import com.juzi.facade.dto.SeekDto;
 import com.juzi.infra.cache.CacheUtil;
+import com.juzi.infra.model.vo.ItemVo;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class CaptureService {
     // 结束
   }
 
-  public List<?> download(String key) {
+  public List<ItemVo> download(String key) {
     return CacheUtil.get(key);
   }
 }
