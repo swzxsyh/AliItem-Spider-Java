@@ -1,0 +1,20 @@
+server:
+  port: 9280 #设置端口
+  servlet:
+    context-path: /spider #设置应用的目录.  前缀需要带/, 无需设置后缀, 示例 【 /xxx 】 or 【 / 】
+spring:
+  profiles:
+    active: local
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
+  application:
+    name: item-spider #应用名称
+
+#日志配置参数。
+logging:
+  level:
+    root: info   #主日志级别
+    com.bydapay: debug   #该项目日志级别，当需要打印sql时请开启为debug
+  file:
+    path: ./logs # 日志存放地址
