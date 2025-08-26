@@ -1,6 +1,6 @@
 package com.juzi.application;
 
-import com.juzi.domain.CaptureRecordDomain;
+import com.juzi.domain.RecordEvent;
 import com.juzi.infra.CaptureConstant;
 import com.juzi.infra.cache.CacheUtil;
 import com.juzi.infra.model.TableDataInfo;
@@ -14,9 +14,9 @@ import org.springframework.stereotype.Service;
 /** 查看历史 */
 @Slf4j
 @Service
-public class RecordService {
+public class RecordProcessor {
 
-  @Autowired private CaptureRecordDomain recordDomain;
+  @Autowired private RecordEvent recordDomain;
 
   public TableDataInfo list(String username, Integer pageNum, Integer pageSize) {
     // 校验用户 再判断内容

@@ -2,6 +2,7 @@ package com.juzi.domain;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.juzi.facade.dto.SeekDto;
 import com.juzi.infra.model.entity.CaptureRecord;
 import com.juzi.infra.mysql.service.ICaptureRecordService;
 import java.util.List;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class CaptureRecordDomain {
+public class RecordEvent {
 
   @Autowired private ICaptureRecordService recordService;
 
@@ -32,5 +33,17 @@ public class CaptureRecordDomain {
             .eq(CaptureRecord::getUuid, uuid)
             .count()
         > 0;
+  }
+
+  public Boolean save(String uuid, SeekDto dto) {
+    CaptureRecord captureRecord = new CaptureRecord();
+    captureRecord.setUuid(uuid);
+    captureRecord.setKeyword(dto.getKeyword());
+    captureRecord.setSort(dto.getSort());
+    captureRecord.setStartPage(dto.getStartPage());
+    captureRecord.setSales(dto.getSales());
+    captureRecord.setComplete(0);
+    captureRecord.setDownload(0);
+    return recordService.save(captureRecord);
   }
 }

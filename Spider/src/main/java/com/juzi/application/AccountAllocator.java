@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class AccountService {
+public class AccountAllocator {
 
   /** 设想应该是name-token, 但看链接似乎是sign签名方法 */
   public static final ConcurrentHashMap<String, String> TOKEN = new ConcurrentHashMap<>();

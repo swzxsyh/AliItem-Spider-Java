@@ -1,5 +1,6 @@
 package com.juzi.application;
 
+import com.juzi.domain.RecordEvent;
 import com.juzi.facade.dto.SeekDto;
 import com.juzi.infra.cache.CacheUtil;
 import com.juzi.infra.model.vo.ItemVo;
@@ -11,18 +12,22 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
-public class CaptureService {
+public class CaptureProcessor {
+
+  @Autowired private RecordEvent recordService;
 
   private static final String SEARCH_URL = "https://s.taobao.com/search?q=";
 
   public void crawl(SeekDto dto) {
     WebDriver driver = SeleniumUtil.getHeadlessDriver();
     String uuid = UUID.randomUUID().toString().replace("-", "");
+    recordService.save(uuid, dto);
 
     try {
       driver.get(SEARCH_URL + dto.getKeyword());
@@ -66,6 +71,7 @@ public class CaptureService {
     for (WebElement item : items) {
       try {
         ItemVo p = new ItemVo();
+
         p.setName(item.findElement(By.cssSelector(".title")).getText());
         p.setUrl(item.findElement(By.cssSelector("a")).getAttribute("href"));
         p.setPrice(item.findElement(By.cssSelector(".price")).getText());

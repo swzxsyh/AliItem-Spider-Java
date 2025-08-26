@@ -37,6 +37,7 @@
     <commons.lang3.version>3.18.0</commons.lang3.version>
     <com.google.guava.version>33.4.8-jre</com.google.guava.version>
     <selenium.version>4.10.0</selenium.version>
+    <bonigarcia.version>5.5.0</bonigarcia.version>
   </properties>
 
   <dependencies>
@@ -88,6 +89,23 @@
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
       <version>${selenium.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.bonigarcia</groupId>
+      <artifactId>webdrivermanager</artifactId>
+      <version>${bonigarcia.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+      <version>5.2.1</version> <!-- 或最新版本 -->
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents.core5</groupId>
+      <artifactId>httpcore5</artifactId>
+      <version>5.2</version>
     </dependency>
 
 

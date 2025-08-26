@@ -1,5 +1,6 @@
 package com.juzi.infra.utils;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -7,7 +8,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 public class SeleniumUtil {
   public static WebDriver getHeadlessDriver() {
     // 服务器路径
-    System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
+    //    System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
+    WebDriverManager.edgedriver().setup();
     ChromeOptions options = new ChromeOptions();
     options.addArguments("--headless"); // 无头模式
     options.addArguments("--no-sandbox");
