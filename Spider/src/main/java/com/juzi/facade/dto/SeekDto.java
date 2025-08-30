@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class SeekDto {
 
+  private String username;
+
   // 关键词
   private String keyword;
 

@@ -9,7 +9,7 @@ public class SeleniumUtil {
   public static WebDriver getHeadlessDriver() {
     // 服务器路径
     //    System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
-    WebDriverManager.edgedriver().setup();
+    WebDriverManager.chromedriver().setup();
     ChromeOptions options = new ChromeOptions();
     options.addArguments("--headless"); // 无头模式
     options.addArguments("--no-sandbox");

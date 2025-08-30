@@ -1,7 +1,7 @@
 package com.juzi.application;
 
 import com.juzi.domain.RecordEvent;
-import com.juzi.infra.CaptureConstant;
+import com.juzi.infra.constants.CaptureConstant;
 import com.juzi.infra.cache.CacheUtil;
 import com.juzi.infra.model.TableDataInfo;
 import com.juzi.infra.model.entity.CaptureRecord;

@@ -3,7 +3,7 @@ package com.juzi.facade;
 import com.juzi.application.CaptureProcessor;
 import com.juzi.application.RecordProcessor;
 import com.juzi.facade.dto.SeekDto;
-import com.juzi.infra.CaptureConstant;
+import com.juzi.infra.constants.CaptureConstant;
 import com.juzi.infra.ExportUtil;
 import com.juzi.infra.model.Result;
 import com.juzi.infra.model.vo.ItemVo;
@@ -28,8 +28,10 @@ public class CaptureController {
 
   @PostMapping("/run")
   public Result<?> seek(@RequestBody SeekDto dto) {
+    // 这个名称后面如果做成项目, 从cookie取
+    String username = dto.getUsername();
     // dto 应包含 关键词, 排序规则, 第几页开始, 销量过滤数量
-    captureProcessor.crawl(dto);
+    captureProcessor.crawlWithCookie(username, dto);
     return Result.success();
   }
 
