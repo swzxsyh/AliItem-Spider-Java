@@ -9,7 +9,6 @@ import com.juzi.infra.model.vo.ItemVo;
 import com.juzi.infra.utils.SeleniumUtil;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -53,15 +52,22 @@ public class CaptureProcessor {
       log.error("没有可用的账号cookie，停止爬取");
       throw new BizException("没有可用的账号cookie，停止爬取");
     }
-    WebDriver driver = SeleniumUtil.getHeadlessDriver();
+
+    WebDriver driver = SeleniumUtil.getNormalDriver();
     try {
       // 关键修正: 先导航到主页，添加cookie，再导航到搜索页
       driver.get(CaptureConstant.TB_LOGIN);
       cookies.iterator().forEachRemaining(cookie -> driver.manage().addCookie(cookie));
 
+      // 导航到目标搜索页面，此时会话已携带登录信息
       driver.get(SEARCH_URL + dto.getKeyword());
 
-      // 调用爬取方法
+      // 检查是否被重定向到了风控页面
+      if (isBlockedOrLoginPage(driver)) {
+        log.error("导航到搜索页后检测到风控，无法继续爬取");
+        throw new BizException("导航到搜索页后检测到风控");
+      }
+
       crawl(driver, dto);
     } finally {
       if (driver != null) {

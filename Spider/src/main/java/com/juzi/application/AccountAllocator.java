@@ -3,8 +3,6 @@ package com.juzi.application;
 import com.juzi.infra.constants.CaptureConstant;
 import com.juzi.infra.utils.SeleniumUtil;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +28,7 @@ public class AccountAllocator {
    * @return 是否登录成功
    */
   public Boolean login(String username, String password) {
-    WebDriver driver = SeleniumUtil.getHeadlessDriver();
+    WebDriver driver = SeleniumUtil.getNormalDriver();
     try {
       Boolean success = doLogin(username, password, driver);
       if (success) {

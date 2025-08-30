@@ -17,4 +17,13 @@ public class SeleniumUtil {
     options.addArguments("--disable-gpu");
     return new ChromeDriver(options);
   }
+
+  public  static WebDriver getNormalDriver() {
+    WebDriverManager.chromedriver().setup();
+    ChromeOptions options = new ChromeOptions();
+    options.addArguments("--no-sandbox");
+    options.addArguments("--disable-dev-shm-usage");
+    options.addArguments("--disable-gpu");
+    return new ChromeDriver(options);
+  }
 }
