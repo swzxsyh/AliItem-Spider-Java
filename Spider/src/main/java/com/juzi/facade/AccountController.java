@@ -15,7 +15,8 @@ public class AccountController {
   @Autowired private AccountAllocator accountAllocator;
 
   @PostMapping("/mall/login")
-  public Result<?> login(@RequestParam String username, @RequestParam String password) {
+  public Result<?> login(
+      @RequestParam String username, @RequestParam(required = false) String password) {
     // login to TaoBao (other else) && getToken
     boolean flag = accountAllocator.login(username, password);
     return flag ? Result.success("登录成功") : Result.error("登录失败");
