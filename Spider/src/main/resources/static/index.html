@@ -2,75 +2,344 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>爬虫系统</title>
   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    h3 { margin-top: 20px; }
-    label { display: block; margin: 5px 0; }
-    input, select { margin-left: 5px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    table, th, td { border: 1px solid #ccc; }
-    th, td { padding: 5px; text-align: left; }
-    button { margin: 5px 0; }
-    .hidden { display: none; }
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2ecc71;
+      --danger-color: #e74c3c;
+      --dark-color: #2c3e50;
+      --light-color: #ecf0f1;
+      --gray-color: #95a5a6;
+      --border-radius: 6px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+    }
+
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      color: var(--dark-color);
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--light-color);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: var(--dark-color);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    button:hover {
+      background-color: #2980b9;
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      background-color: var(--gray-color);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    button.danger {
+      background-color: var(--danger-color);
+    }
+
+    button.danger:hover {
+      background-color: #c0392b;
+    }
+
+    button.success {
+      background-color: var(--secondary-color);
+    }
+
+    button.success:hover {
+      background-color: #27ae60;
+    }
+
+    .qr-container {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .qr-image {
+      width: 200px;
+      height: 200px;
+      border: 1px solid #eee;
+      padding: 10px;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    .status-message {
+      padding: 10px;
+      border-radius: var(--border-radius);
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .status-info {
+      background-color: #d6eaf8;
+      color: #2874a6;
+    }
+
+    .status-success {
+      background-color: #d5f5e3;
+      color: #1e8449;
+    }
+
+    .status-error {
+      background-color: #fadbd8;
+      color: #c0392b;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e1e1e1;
+    }
+
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    tr:hover {
+      background-color: #f1f8ff;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .page-info {
+      font-weight: 500;
+      color: var(--dark-color);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .login-title {
+      font-size: 24px;
+      color: var(--dark-color);
+      margin-bottom: 5px;
+    }
+
+    .login-subtitle {
+      color: var(--gray-color);
+      font-size: 14px;
+    }
+
+    .grid-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    @media (max-width: 768px) {
+      #app {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 15px;
+      }
+
+      .grid-form {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
   </style>
 </head>
 <body>
 <div id="app">
   <!-- 登录区域 -->
-  <div v-if="!loggedIn">
-    <h3>扫码登录</h3>
-    <label>用户名: <input v-model="username" required></label><br>
-    <button @click="getQRCode">生成二维码</button><br>
-    <img v-if="qrBase64" :src="qrBase64" style="width:200px;height:200px;margin-top:10px;"><br>
-    <p>{{loginStatus}}</p>
+  <div class="container" v-if="!loggedIn">
+    <div class="login-header">
+      <h2 class="login-title">爬虫管理系统</h2>
+      <p class="login-subtitle">请先登录以使用系统功能</p>
+    </div>
+
+    <div class="form-group">
+      <label for="username">用户名</label>
+      <input type="text" id="username" v-model="username" placeholder="请输入用户名" required>
+    </div>
+
+    <button class="success" @click="getQRCode">生成二维码</button>
+
+    <div class="qr-container" v-if="qrBase64">
+      <img :src="qrBase64" class="qr-image" alt="登录二维码">
+    </div>
+
+    <div :class="['status-message', statusClass]" v-if="loginStatus">{{loginStatus}}</div>
   </div>
 
   <!-- 搜索和记录区域 -->
   <div v-if="loggedIn">
-    <h3>搜索任务</h3>
-    <form @submit.prevent="startSearch">
-      <label>关键词: <input v-model="seek.keyword" required></label>
-      <label>店铺类型: <input type="number" v-model="seek.shopType"></label>
-      <label>排序规则: <input type="number" v-model="seek.sort"></label>
-      <label>起始页: <input type="number" v-model="seek.startPage"></label>
-      <label>销量过滤: <input type="number" v-model="seek.sales"></label>
-      <button type="submit">开始抓取</button>
-    </form>
+    <div class="container">
+      <h3>搜索任务</h3>
+      <form @submit.prevent="startSearch" class="grid-form">
+        <div class="form-group">
+          <label>关键词</label>
+          <input v-model="seek.keyword" placeholder="请输入关键词" required>
+        </div>
 
-    <h3>抓取记录</h3>
-    <table>
-      <thead>
-      <tr>
-        <th>UUID</th>
-        <th>关键词</th>
-        <th>排序</th>
-        <th>起始页</th>
-        <th>销量</th>
-        <th>完成</th>
-        <th>下载</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="record in records" :key="record.uuid">
-        <td>{{record.uuid}}</td>
-        <td>{{record.keyword}}</td>
-        <td>{{record.sort}}</td>
-        <td>{{record.startPage}}</td>
-        <td>{{record.sales}}</td>
-        <td>{{record.complete ? '是' : '否'}}</td>
-        <td>
-          <button @click="download(record.uuid)" :disabled="!record.complete">下载</button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-    <div>
-      <button @click="prevPage" :disabled="pageNum<=1">上一页</button>
-      <button @click="nextPage">下一页</button>
-      页码: {{pageNum}}
+        <div class="form-group">
+          <label>店铺类型</label>
+          <input type="number" v-model="seek.shopType" placeholder="请输入店铺类型">
+        </div>
+
+        <div class="form-group">
+          <label>排序规则</label>
+          <input type="number" v-model="seek.sort" placeholder="请输入排序规则">
+        </div>
+
+        <div class="form-group">
+          <label>起始页</label>
+          <input type="number" v-model="seek.startPage" placeholder="请输入起始页码">
+        </div>
+
+        <div class="form-group">
+          <label>销量过滤</label>
+          <input type="number" v-model="seek.sales" placeholder="请输入最小销量">
+        </div>
+      </form>
+
+      <button type="submit" @click="startSearch" class="success">开始抓取</button>
+    </div>
+
+    <div class="container">
+      <h3>抓取记录</h3>
+      <table>
+        <thead>
+        <tr>
+          <th>UUID</th>
+          <th>关键词</th>
+          <th>排序</th>
+          <th>起始页</th>
+          <th>销量</th>
+          <th>完成状态</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="record in records" :key="record.uuid">
+          <td>{{record.uuid}}</td>
+          <td>{{record.keyword}}</td>
+          <td>{{record.sort || '-'}}</td>
+          <td>{{record.startPage}}</td>
+          <td>{{record.sales || '-'}}</td>
+          <td>
+            <span :style="{color: record.complete ? '#27ae60' : '#e74c3c'}">
+              {{record.complete ? '已完成' : '进行中'}}
+            </span>
+          </td>
+          <td>
+            <button
+                @click="download(record.uuid)"
+                :disabled="!record.complete"
+                :class="{success: record.complete}">
+              {{record.complete ? '下载' : '等待完成'}}
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <button @click="prevPage" :disabled="pageNum<=1">上一页</button>
+        <span class="page-info">页码: {{pageNum}}</span>
+        <button @click="nextPage">下一页</button>
+      </div>
     </div>
   </div>
 </div>
@@ -79,7 +348,7 @@
   new Vue({
     el: '#app',
     data: {
-      apiPrefix: '/spider', // 配置上下文路径
+      apiPrefix: '/spider',
       username: '',
       qrBase64: '',
       loginStatus: '',
@@ -96,18 +365,33 @@
       pageNum: 1,
       pageSize: 10
     },
+    computed: {
+      statusClass() {
+        if (this.loginStatus.includes('成功')) return 'status-success';
+        if (this.loginStatus.includes('错误') || this.loginStatus.includes('失败')) return 'status-error';
+        return 'status-info';
+      }
+    },
     methods: {
-      // 获取二维码
       getQRCode() {
-        if(!this.username) { alert("请输入用户名"); return; }
+        if(!this.username) {
+          this.loginStatus = '错误：请输入用户名';
+          return;
+        }
+
+        this.loginStatus = '正在生成二维码...';
         axios.get(`${this.apiPrefix}/account/mall/qrcode`, { params: { username: this.username } })
         .then(res => {
           this.qrBase64 = res.data.data || '';
-          this.loginStatus = '请扫码登录...';
+          this.loginStatus = '二维码已生成，请扫码登录...';
           this.pollLoginStatus();
+        })
+        .catch(error => {
+          this.loginStatus = '错误：生成二维码失败';
+          console.error('QR code generation failed:', error);
         });
       },
-      // 轮询登录状态
+
       pollLoginStatus() {
         const interval = setInterval(() => {
           axios.get(`${this.apiPrefix}/account/mall/login/status`, { params: { username: this.username } })
@@ -119,36 +403,59 @@
               clearInterval(interval);
               this.fetchRecords();
             }
+          })
+          .catch(error => {
+            console.error('Login status check failed:', error);
           });
         }, 2000);
       },
-      // 开始抓取
+
       startSearch() {
+        if (!this.seek.keyword) {
+          alert('请输入关键词');
+          return;
+        }
+
         axios.post(`${this.apiPrefix}/capture/run`, this.seek)
         .then(res => {
           alert('抓取任务已启动');
           this.fetchRecords();
+        })
+        .catch(error => {
+          alert('启动抓取任务失败');
+          console.error('Task start failed:', error);
         });
       },
-      // 查询抓取记录
+
       fetchRecords() {
         axios.get(`${this.apiPrefix}/record/list`, {
           params: { username: this.username, pageNum: this.pageNum, pageSize: this.pageSize }
         }).then(res => {
           this.records = res.data.rows || [];
+        }).catch(error => {
+          console.error('Fetch records failed:', error);
         });
       },
-      // 下载结果
+
       download(uuid) {
         const link = document.createElement('a');
         link.href = `${this.apiPrefix}/capture/download?userName=${this.username}&uuid=${uuid}`;
         link.click();
       },
-      nextPage() { this.pageNum++; this.fetchRecords(); },
-      prevPage() { if(this.pageNum>1) { this.pageNum--; this.fetchRecords(); } }
+
+      nextPage() {
+        this.pageNum++;
+        this.fetchRecords();
+      },
+
+      prevPage() {
+        if(this.pageNum > 1) {
+          this.pageNum--;
+          this.fetchRecords();
+        }
+      }
     },
     mounted() {
-      // 每隔 5 秒刷新记录状态
       setInterval(() => {
         if(this.loggedIn) this.fetchRecords();
       }, 5000);
