@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>爬虫系统</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h3 { margin-top: 20px; }
+    label { display: block; margin: 5px 0; }
+    input, select { margin-left: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 5px; text-align: left; }
+    button { margin: 5px 0; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- 登录区域 -->
+  <div v-if="!loggedIn">
+    <h3>扫码登录</h3>
+    <label>用户名: <input v-model="username" required></label><br>
+    <button @click="getQRCode">生成二维码</button><br>
+    <img v-if="qrBase64" :src="qrBase64" style="width:200px;height:200px;margin-top:10px;"><br>
+    <p>{{loginStatus}}</p>
+  </div>
+
+  <!-- 搜索和记录区域 -->
+  <div v-if="loggedIn">
+    <h3>搜索任务</h3>
+    <form @submit.prevent="startSearch">
+      <label>关键词: <input v-model="seek.keyword" required></label>
+      <label>店铺类型: <input type="number" v-model="seek.shopType"></label>
+      <label>排序规则: <input type="number" v-model="seek.sort"></label>
+      <label>起始页: <input type="number" v-model="seek.startPage"></label>
+      <label>销量过滤: <input type="number" v-model="seek.sales"></label>
+      <button type="submit">开始抓取</button>
+    </form>
+
+    <h3>抓取记录</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>UUID</th>
+        <th>关键词</th>
+        <th>排序</th>
+        <th>起始页</th>
+        <th>销量</th>
+        <th>完成</th>
+        <th>下载</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr v-for="record in records" :key="record.uuid">
+        <td>{{record.uuid}}</td>
+        <td>{{record.keyword}}</td>
+        <td>{{record.sort}}</td>
+        <td>{{record.startPage}}</td>
+        <td>{{record.sales}}</td>
+        <td>{{record.complete ? '是' : '否'}}</td>
+        <td>
+          <button @click="download(record.uuid)" :disabled="!record.complete">下载</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+    <div>
+      <button @click="prevPage" :disabled="pageNum<=1">上一页</button>
+      <button @click="nextPage">下一页</button>
+      页码: {{pageNum}}
+    </div>
+  </div>
+</div>
+
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      apiPrefix: '/spider', // 配置上下文路径
+      username: '',
+      qrBase64: '',
+      loginStatus: '',
+      loggedIn: false,
+      seek: {
+        username: '',
+        keyword: '',
+        shopType: null,
+        sort: null,
+        startPage: 1,
+        sales: null
+      },
+      records: [],
+      pageNum: 1,
+      pageSize: 10
+    },
+    methods: {
+      // 获取二维码
+      getQRCode() {
+        if(!this.username) { alert("请输入用户名"); return; }
+        axios.get(`${this.apiPrefix}/account/mall/qrcode`, { params: { username: this.username } })
+        .then(res => {
+          this.qrBase64 = res.data.data || '';
+          this.loginStatus = '请扫码登录...';
+          this.pollLoginStatus();
+        });
+      },
+      // 轮询登录状态
+      pollLoginStatus() {
+        const interval = setInterval(() => {
+          axios.get(`${this.apiPrefix}/account/mall/login/status`, { params: { username: this.username } })
+          .then(res => {
+            if (res.data.code === 200 && res.data.data === '登录成功') {
+              this.loggedIn = true;
+              this.loginStatus = '登录成功';
+              this.seek.username = this.username;
+              clearInterval(interval);
+              this.fetchRecords();
+            }
+          });
+        }, 2000);
+      },
+      // 开始抓取
+      startSearch() {
+        axios.post(`${this.apiPrefix}/capture/run`, this.seek)
+        .then(res => {
+          alert('抓取任务已启动');
+          this.fetchRecords();
+        });
+      },
+      // 查询抓取记录
+      fetchRecords() {
+        axios.get(`${this.apiPrefix}/record/list`, {
+          params: { username: this.username, pageNum: this.pageNum, pageSize: this.pageSize }
+        }).then(res => {
+          this.records = res.data.rows || [];
+        });
+      },
+      // 下载结果
+      download(uuid) {
+        const link = document.createElement('a');
+        link.href = `${this.apiPrefix}/capture/download?userName=${this.username}&uuid=${uuid}`;
+        link.click();
+      },
+      nextPage() { this.pageNum++; this.fetchRecords(); },
+      prevPage() { if(this.pageNum>1) { this.pageNum--; this.fetchRecords(); } }
+    },
+    mounted() {
+      // 每隔 5 秒刷新记录状态
+      setInterval(() => {
+        if(this.loggedIn) this.fetchRecords();
+      }, 5000);
+    }
+  });
+</script>
+</body>
+</html>
