@@ -200,8 +200,6 @@ public class AccountAllocator {
       }
     } catch (Exception e) {
       task.setSuccess(false);
-    } finally {
-      DriverHolder.remove(username);
     }
   }
 

@@ -1,5 +1,6 @@
 package com.juzi.application;
 
+import com.juzi.domain.DriverHolder;
 import com.juzi.domain.PageEvent;
 import com.juzi.domain.RecordEvent;
 import com.juzi.facade.dto.SeekDto;
@@ -7,15 +8,15 @@ import com.juzi.infra.cache.CacheUtil;
 import com.juzi.infra.constants.CaptureConstant;
 import com.juzi.infra.exception.BizException;
 import com.juzi.infra.model.vo.ItemVo;
-import com.juzi.infra.utils.SeleniumUtil;
+import com.juzi.infra.trigger.DriverTask;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.UUID;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,24 +32,21 @@ public class CaptureProcessor {
   @Autowired private AccountAllocator accountAllocator;
 
   /** 使用已保存的 cookie 来执行爬取任务 */
+  @SneakyThrows
   public void crawlWithCookie(String username, SeekDto dto) {
     if (StringUtils.isBlank(username)) {
       throw new BizException("username 不能为空");
     }
-    Set<Cookie> cookies = accountAllocator.getToken(username);
-    if (CollectionUtils.isEmpty(cookies)) {
-      log.error("没有可用的账号cookie，停止爬取");
-      throw new BizException("没有可用的账号cookie，停止爬取");
+    // 取出登录的driver, 减少淘宝风控risk
+    DriverTask task = DriverHolder.get(username);
+    if (task == null || task.getDriver() == null || !task.isSuccess()) {
+      throw new BizException("请先扫码登录完成");
     }
 
-    WebDriver driver = SeleniumUtil.getNormalDriver();
+    WebDriver driver = task.getDriver();
     try {
-      // 关键修正: 先导航到主页，添加cookie，再导航到搜索页
-      driver.get(CaptureConstant.TB_LOGIN);
-      cookies.iterator().forEachRemaining(cookie -> driver.manage().addCookie(cookie));
-
       // 导航到目标搜索页面，此时会话已携带登录信息
-      driver.get(CaptureConstant.SEARCH_URL + dto.getKeyword());
+      driver.get(CaptureConstant.SEARCH_URL + URLEncoder.encode(dto.getKeyword(), "UTF-8"));
 
       // 检查是否被重定向到了风控页面
       if (pageEvent.isBlockedOrLoginPage(driver)) {
@@ -56,7 +54,12 @@ public class CaptureProcessor {
         throw new BizException("导航到搜索页后检测到风控");
       }
 
-      crawl(driver, dto);
+      crawl(driver, username, dto);
+    } catch (Exception e) {
+      log.error("crawlWithCookie failed: ", e);
+      if (driver != null) {
+        driver.quit();
+      }
     } finally {
       if (driver != null) {
         driver.quit();
@@ -64,9 +67,9 @@ public class CaptureProcessor {
     }
   }
 
-  public void crawl(WebDriver driver, SeekDto dto) {
+  public void crawl(WebDriver driver, String username, SeekDto dto) {
     String uuid = UUID.randomUUID().toString().replace("-", "");
-    recordService.save(uuid, dto);
+    recordService.save(uuid, username, dto);
 
     try {
       // 在等待商品元素之前，先检查是否进入了风控/登录页面

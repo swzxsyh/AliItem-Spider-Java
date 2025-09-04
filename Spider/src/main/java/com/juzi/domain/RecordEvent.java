@@ -35,9 +35,10 @@ public class RecordEvent {
         > 0;
   }
 
-  public Boolean save(String uuid, SeekDto dto) {
+  public Boolean save(String uuid, String userName, SeekDto dto) {
     CaptureRecord captureRecord = new CaptureRecord();
     captureRecord.setUuid(uuid);
+    captureRecord.setUserName(userName);
     captureRecord.setKeyword(dto.getKeyword());
     captureRecord.setSort(dto.getSort());
     captureRecord.setStartPage(dto.getStartPage());
