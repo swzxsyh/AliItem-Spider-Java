@@ -23,4 +23,9 @@ public class ItemVo {
 
   @Alias("品类")
   private String category;
+
+  public static int convertSales(String salesStr) {
+    // TODO 处理销量过滤
+    return 0;
+  }
 }

@@ -3,6 +3,7 @@ package com.juzi.domain;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.juzi.facade.dto.SeekDto;
+import com.juzi.infra.enums.CItemStateEnum;
 import com.juzi.infra.model.entity.CaptureRecord;
 import com.juzi.infra.mysql.service.ICaptureRecordService;
 import java.util.List;
@@ -43,8 +44,38 @@ public class RecordEvent {
     captureRecord.setSort(dto.getSort());
     captureRecord.setStartPage(dto.getStartPage());
     captureRecord.setSales(dto.getSales());
-    captureRecord.setComplete(0);
-    captureRecord.setDownload(0);
+    captureRecord.setComplete(CItemStateEnum.INITIAL.getState());
+    captureRecord.setDownload(CItemStateEnum.INITIAL.getState());
     return recordService.save(captureRecord);
+  }
+
+  public void stop(String uuid, String username, String remark) {
+    recordService
+        .lambdaUpdate()
+        .eq(CaptureRecord::getUuid, uuid)
+        .eq(CaptureRecord::getUserName, username)
+        .set(CaptureRecord::getComplete, CItemStateEnum.ERROR.getState())
+        .set(CaptureRecord::getDownload, CItemStateEnum.INITIAL.getState())
+        .update();
+  }
+
+  public void complete(String uuid, String username, String remark) {
+    recordService
+        .lambdaUpdate()
+        .eq(CaptureRecord::getUuid, uuid)
+        .eq(CaptureRecord::getUserName, username)
+        .set(CaptureRecord::getComplete, CItemStateEnum.COMPLETE.getState())
+        .set(CaptureRecord::getDownload, CItemStateEnum.INITIAL.getState())
+        .update();
+  }
+
+
+  public void download(String uuid, String username) {
+    recordService
+        .lambdaUpdate()
+        .eq(CaptureRecord::getUuid, uuid)
+        .eq(CaptureRecord::getUserName, username)
+        .set(CaptureRecord::getDownload, CItemStateEnum.COMPLETE.getState())
+        .update();
   }
 }

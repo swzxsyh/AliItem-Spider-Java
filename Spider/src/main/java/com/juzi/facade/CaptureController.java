@@ -3,15 +3,15 @@ package com.juzi.facade;
 import com.juzi.application.CaptureProcessor;
 import com.juzi.application.RecordProcessor;
 import com.juzi.facade.dto.SeekDto;
-import com.juzi.infra.constants.CaptureConstant;
 import com.juzi.infra.ExportUtil;
+import com.juzi.infra.exception.BizException;
 import com.juzi.infra.model.Result;
 import com.juzi.infra.model.vo.ItemVo;
-import com.juzi.infra.utils.BuilderUtil;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,10 +44,12 @@ public class CaptureController {
     boolean exist = recordProcessor.check(userName, uuid);
 
     if (exist) {
-      String key = BuilderUtil.format(CaptureConstant.RECORD_REFIX, userName, uuid);
-      List<ItemVo> rows = captureProcessor.download(key);
+      List<ItemVo> rows = captureProcessor.download(userName, uuid);
+      if (CollectionUtils.isEmpty(rows)) {
+        throw new BizException("Record Not Exist");
+      }
       ExportUtil.export(rows, uuid, response);
     }
-    throw new RuntimeException("Record Not Exist");
+    throw new BizException("Record Not Exist");
   }
 }

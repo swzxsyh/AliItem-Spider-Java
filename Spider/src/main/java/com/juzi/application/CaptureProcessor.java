@@ -9,6 +9,7 @@ import com.juzi.infra.constants.CaptureConstant;
 import com.juzi.infra.exception.BizException;
 import com.juzi.infra.model.vo.ItemVo;
 import com.juzi.infra.trigger.DriverTask;
+import com.juzi.infra.utils.BuilderUtil;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -48,12 +49,6 @@ public class CaptureProcessor {
       // 导航到目标搜索页面，此时会话已携带登录信息
       driver.get(CaptureConstant.SEARCH_URL + URLEncoder.encode(dto.getKeyword(), "UTF-8"));
 
-      // 检查是否被重定向到了风控页面
-      if (pageEvent.isBlockedOrLoginPage(driver)) {
-        log.error("导航到搜索页后检测到风控，无法继续爬取");
-        throw new BizException("导航到搜索页后检测到风控");
-      }
-
       crawl(driver, username, dto);
     } catch (Exception e) {
       log.error("crawlWithCookie failed: ", e);
@@ -71,6 +66,13 @@ public class CaptureProcessor {
     String uuid = UUID.randomUUID().toString().replace("-", "");
     recordService.save(uuid, username, dto);
 
+    // 检查是否被重定向到了风控页面
+    if (pageEvent.isBlockedOrLoginPage(driver)) {
+      log.error("导航到搜索页后检测到风控，无法继续爬取");
+      recordService.stop(uuid, username, "导航到搜索页后检测到风控");
+      throw new BizException("导航到搜索页后检测到风控");
+    }
+
     try {
       // 在等待商品元素之前，先检查是否进入了风控/登录页面
       if (pageEvent.isBlockedOrLoginPage(driver)) {
@@ -86,6 +88,7 @@ public class CaptureProcessor {
           // 检测风控
           if (pageEvent.isBlockedOrLoginPage(driver)) {
             log.error("被淘宝风控拦截，停止爬取");
+            recordService.stop(uuid, username, "被淘宝风控拦截");
             break;
           }
 
@@ -96,16 +99,27 @@ public class CaptureProcessor {
           List<ItemVo> result = run(driver);
           if (CollectionUtils.isEmpty(result)) {
             log.info("当前页没有数据，结束抓取");
+            recordService.stop(uuid, username, "被淘宝风控拦截");
             break;
           }
 
           CacheUtil.rpush(uuid, result);
+
+          // 销量判断
+          if (result.stream()
+              .map(ItemVo::getSales)
+              .map(ItemVo::convertSales)
+              .anyMatch(e -> e <= dto.getSales())) {
+            recordService.complete(uuid, username, "没有下一页");
+            break;
+          }
 
           // 随机等待，模拟真人
           pageEvent.randomSleep(2000, 4000);
 
           if (!pageEvent.hasNextPage(driver)) {
             log.info("没有下一页，结束抓取");
+            recordService.complete(uuid, username, "没有下一页");
             break;
           }
 
@@ -118,8 +132,6 @@ public class CaptureProcessor {
           break;
         }
       }
-      download(uuid);
-      CacheUtil.del(uuid);
     } catch (Exception e) {
       log.error("crawl() 出错: ", e);
     } finally {
@@ -185,7 +197,9 @@ public class CaptureProcessor {
     return result;
   }
 
-  public List<ItemVo> download(String key) {
+  public List<ItemVo> download(String userName, String uuid) {
+    String key = BuilderUtil.format(CaptureConstant.RECORD_REFIX, userName, uuid);
+    recordService.download(userName, uuid);
     return CacheUtil.get(key);
   }
 }
